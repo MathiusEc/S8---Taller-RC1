@@ -9,6 +9,6 @@ int menu(){
     printf("2.Editar producto.\n");
     printf("3.Eliminar producto.\n");
     printf("4.Salir del programa.\n");
-    printf("-----FIN MENU-----\n");
+    printf(">> ");
    return opc;
 }
