@@ -3,6 +3,7 @@
 #include "funciones.h"
 
 #define MAX_PRODUCTOS 5
+#define TASA_IMPUESTO_BASE 15 // Bienes y servicios utlizados en la producción
 
 int main(int argc, char *argv[])
 {
@@ -25,7 +26,7 @@ int main(int argc, char *argv[])
             fflush(stdin);
             continue;
         }
-        
+
         switch (opci)
         {
         case 1:
@@ -51,8 +52,58 @@ int main(int argc, char *argv[])
             numProductos++;
             printf("\nProducto registrado correctamente.\n");
             break;
-            break;
 
+        case 2:
+            if (numProductos == 0)
+            {
+                printf("\n\tNo hay productos registrados.\n");
+                break;
+            }
+            {
+                char nombreBuscar[30];
+                int indice = -1;
+                int cantidad;
+                float tiempoDisponible, recursosDisponibles;
+
+                printf("\n\tIngrese el nombre del producto a verificar: ");
+                fflush(stdin);
+                fgets(nombreBuscar, 30, stdin);
+                nombreBuscar[strcspn(nombreBuscar, "\n")] = '\0';
+
+                // Buscar el índice del producto
+                for (int i = 0; i < numProductos; i++)
+                {
+                    if (strcmp(nombres[i], nombreBuscar) == 0)
+                    {
+                        indice = i;
+                        break;
+                    }
+                }
+
+                if (indice == -1)
+                {
+                    printf("\tProducto no encontrado.\n");
+                    break;
+                }
+
+                printf("Ingrese la cantidad a producir: ");
+                scanf("%d", &cantidad);
+                fflush(stdin);
+
+                printf("Ingrese el tiempo disponible (horas): ");
+                scanf("%f", &tiempoDisponible);
+                fflush(stdin);
+
+                printf("Ingrese los recursos disponibles (unidades): ");
+                scanf("%f", &recursosDisponibles);
+                fflush(stdin);
+
+                verificarFactibilidad(
+                    nombres, tiempos, recursos, costos, registros,
+                    indice, cantidad, tiempoDisponible, recursosDisponibles, TASA_IMPUESTO_BASE);
+            }
+            break;
+            
         default:
             break;
         }
