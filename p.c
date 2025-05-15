@@ -1,11 +1,11 @@
 /**
- * Sistema de Optimización de Producción para Componentes Electrónicos
+ * Sistema de Producción para Componentes Electrónicos
  * 
  * Este programa permite gestionar la planificación de producción
  * para una fábrica de componentes electrónicos, calculando tiempos,
  * recursos necesarios y verificando la factibilidad de producción.
  * 
- * Versión mejorada con impuestos, registros sanitarios y más funcionalidades.
+ * Versión mejorada con factura detallada y cálculo de impuestos dinámico.
  */
 
 #include <stdio.h>
@@ -13,39 +13,31 @@
 
 #define MAX_PRODUCTOS 5
 #define MAX_NOMBRE 50
-#define MAX_REGISTRO 20
+#define MAX_REGISTRO 10
 #define TASA_IMPUESTO_BASE 16.0  // Porcentaje de IVA base
 
 // Prototipos de funciones
 void ingresarProductos(char nombres[][MAX_NOMBRE], float tiempos[], float recursos[], 
-                     int cantidades[], float impuestos[], char registros[][MAX_REGISTRO],
-                     int prioridades[], int* numProductos);
-void calcularRequerimientos(float tiempos[], float recursos[], int cantidades[], 
-                         float impuestos[], int numProductos, float* tiempoTotal, 
-                         float* recursosTotal, float* impuestoTotal);
-int verificarFactibilidad(float tiempoTotal, float recursosTotal, 
-                       float tiempoDisponible, float recursosDisponibles);
+                     float costos[], char registros[][MAX_REGISTRO], int* numProductos);
+void calcularRequerimientos(float tiempo, float recurso, 
+                         int cantidad, float costo, float impuesto,
+                         float* tiempoTotal, float* recursosTotal, float* costoTotal, 
+                         float* impuestoTotal);
+void verificarFactibilidad(char nombres[][MAX_NOMBRE], float tiempos[], float recursos[], 
+                        float costos[], char registros[][MAX_REGISTRO], int indice, int cantidad, 
+                        float tiempoDisponible, float recursosDisponibles, float impuesto);
 void buscarProducto(char nombres[][MAX_NOMBRE], int numProductos, 
                   char buscar[], int* indice);
 void editarProducto(char nombres[][MAX_NOMBRE], float tiempos[], 
-                  float recursos[], int cantidades[], float impuestos[],
-                  char registros[][MAX_REGISTRO], int prioridades[], int numProductos);
+                  float recursos[], float costos[], char registros[][MAX_REGISTRO], 
+                  int numProductos);
 void eliminarProducto(char nombres[][MAX_NOMBRE], float tiempos[], 
-                    float recursos[], int cantidades[], float impuestos[],
-                    char registros[][MAX_REGISTRO], int prioridades[], 
+                    float recursos[], float costos[], char registros[][MAX_REGISTRO], 
                     int* numProductos, int indice);
 void mostrarProductos(char nombres[][MAX_NOMBRE], float tiempos[], 
-                    float recursos[], int cantidades[], float impuestos[],
-                    char registros[][MAX_REGISTRO], int prioridades[], int numProductos);
-void limpiarBuffer();
-void optimizarProduccion(char nombres[][MAX_NOMBRE], float tiempos[], 
-                       float recursos[], int cantidades[], int prioridades[], 
-                       int numProductos, float tiempoDisponible, float recursosDisponibles);
-void calcularCostoTotal(float recursos[], int cantidades[], float impuestos[], 
-                      int numProductos, float* costoSinImpuesto, float* impuestoTotal, 
-                      float* costoTotal);
-void verificarRegistrosSanitarios(char registros[][MAX_REGISTRO], int numProductos);
-int validarRegistroSanitario(char registro[]);
+                    float recursos[], float costos[], char registros[][MAX_REGISTRO], 
+                    int numProductos);
+void imprimirLinea(int longitud, char caracter);
 
 int main() {
     // Declaración de variables y arreglos
@@ -53,59 +45,90 @@ int main() {
     char registros[MAX_PRODUCTOS][MAX_REGISTRO];
     float tiempos[MAX_PRODUCTOS];
     float recursos[MAX_PRODUCTOS];
-    float impuestos[MAX_PRODUCTOS];
-    int cantidades[MAX_PRODUCTOS];
-    int prioridades[MAX_PRODUCTOS];
+    float costos[MAX_PRODUCTOS];
     int numProductos = 0;
     int opcion;
-    float tiempoTotal = 0, recursosTotal = 0, impuestoTotal = 0;
     float tiempoDisponible, recursosDisponibles;
     char nombreBuscar[MAX_NOMBRE];
     int indiceBusqueda;
-    float costoSinImpuesto = 0, costoTotal = 0;
+    int cantidad;
     
-    printf("=== SISTEMA DE OPTIMIZACIÓN DE PRODUCCIÓN ===\n\n");
+    printf("=== SISTEMA DE PRODUCCIÓN DE COMPONENTES ELECTRÓNICOS ===\n\n");
     
     // Bucle principal del programa
     do {
         printf("\nMENU PRINCIPAL:\n");
         printf("1. Ingresar productos\n");
-        printf("2. Calcular requerimientos totales\n");
-        printf("3. Verificar factibilidad de producción\n");
-        printf("4. Editar un producto\n");
-        printf("5. Eliminar un producto\n");
-        printf("6. Mostrar todos los productos\n");
-        printf("7. Optimizar plan de producción\n");
-        printf("8. Calcular costo total con impuestos\n");
-        printf("9. Verificar validez de registros sanitarios\n");
-        printf("10. Salir\n");
+        printf("2. Verificar factibilidad de producción\n");
+        printf("3. Editar un producto\n");
+        printf("4. Eliminar un producto\n");
+        printf("5. Mostrar todos los productos\n");
+        printf("6. Salir\n");
         printf("Seleccione una opción: ");
         
         // Validar entrada del usuario
         if (scanf("%d", &opcion) != 1) {
             printf("Entrada inválida. Ingrese un número.\n");
-            limpiarBuffer();
+            fflush(stdin);
             continue;
         }
-        limpiarBuffer();
+        fflush(stdin);
         
         // Procesar opción seleccionada
         switch (opcion) {
             case 1:
-                ingresarProductos(nombres, tiempos, recursos, cantidades, 
-                                impuestos, registros, prioridades, &numProductos);
+                ingresarProductos(nombres, tiempos, recursos, costos, 
+                                registros, &numProductos);
                 break;
                 
             case 2:
                 if (numProductos == 0) {
                     printf("Error: No hay productos registrados.\n");
                 } else {
-                    calcularRequerimientos(tiempos, recursos, cantidades, impuestos,
-                                          numProductos, &tiempoTotal, &recursosTotal, &impuestoTotal);
-                    printf("\nRequerimientos totales calculados:\n");
-                    printf("- Tiempo total necesario: %.2f horas\n", tiempoTotal);
-                    printf("- Recursos totales necesarios: %.2f unidades\n", recursosTotal);
-                    printf("- Impuesto total a pagar: %.2f\n", impuestoTotal);
+                    printf("\nIngrese el nombre del producto a verificar: ");
+                    fgets(nombreBuscar, MAX_NOMBRE, stdin);
+                    nombreBuscar[strcspn(nombreBuscar, "\n")] = '\0'; // Eliminar salto de línea
+                    
+                    indiceBusqueda = -1;
+                    buscarProducto(nombres, numProductos, nombreBuscar, &indiceBusqueda);
+                    
+                    if (indiceBusqueda == -1) {
+                        printf("Error: Producto no encontrado.\n");
+                        break;
+                    }
+                    
+                    printf("\nIngrese la cantidad a producir: ");
+                    scanf("%d", &cantidad);
+                    fflush(stdin);
+                    
+                    if (cantidad <= 0) {
+                        printf("Error: La cantidad debe ser mayor que cero.\n");
+                        break;
+                    }
+                    
+                    printf("\nIngrese el tiempo disponible (horas): ");
+                    scanf("%f", &tiempoDisponible);
+                    fflush(stdin);
+                    
+                    printf("Ingrese los recursos disponibles (unidades): ");
+                    scanf("%f", &recursosDisponibles);
+                    fflush(stdin);
+                    
+                    // Definir el impuesto según la cantidad
+                    float impuesto;
+                    if (cantidad < 10) {
+                        impuesto = 16.0; // IVA estándar para cantidades pequeñas
+                    } else if (cantidad < 50) {
+                        impuesto = 12.0; // Impuesto reducido para cantidades medianas
+                    } else {
+                        impuesto = 8.0;  // Impuesto mínimo para grandes cantidades
+                    }
+                    
+                    printf("\nImpuesto aplicable: %.1f%% (basado en la cantidad)\n", impuesto);
+                    
+                    verificarFactibilidad(nombres, tiempos, recursos, costos, 
+                                       registros, indiceBusqueda, cantidad, tiempoDisponible, 
+                                       recursosDisponibles, impuesto);
                 }
                 break;
                 
@@ -113,58 +136,12 @@ int main() {
                 if (numProductos == 0) {
                     printf("Error: No hay productos registrados.\n");
                 } else {
-                    // Calcular primero los requerimientos si no se ha hecho
-                    if (tiempoTotal == 0 && recursosTotal == 0) {
-                        calcularRequerimientos(tiempos, recursos, cantidades, impuestos,
-                                             numProductos, &tiempoTotal, &recursosTotal, &impuestoTotal);
-                    }
-                    
-                    printf("\nIngrese el tiempo disponible (horas): ");
-                    scanf("%f", &tiempoDisponible);
-                    limpiarBuffer();
-                    
-                    printf("Ingrese los recursos disponibles (unidades): ");
-                    scanf("%f", &recursosDisponibles);
-                    limpiarBuffer();
-                    
-                    if (verificarFactibilidad(tiempoTotal, recursosTotal, 
-                                           tiempoDisponible, recursosDisponibles)) {
-                        printf("\n¡FACTIBLE! Es posible cumplir con la demanda con los recursos disponibles.\n");
-                    } else {
-                        printf("\n¡NO FACTIBLE! No es posible cumplir con la demanda con los recursos disponibles.\n");
-                        
-                        // Mostrar faltantes sin usar operador ternario
-                        float tiempoFaltante = 0;
-                        float recursosFaltantes = 0;
-                        
-                        if (tiempoTotal > tiempoDisponible) {
-                            tiempoFaltante = tiempoTotal - tiempoDisponible;
-                        }
-                        
-                        if (recursosTotal > recursosDisponibles) {
-                            recursosFaltantes = recursosTotal - recursosDisponibles;
-                        }
-                        
-                        printf("Faltaría: %.2f horas y/o %.2f unidades de recursos.\n", 
-                              tiempoFaltante, recursosFaltantes);
-                    }
+                    editarProducto(nombres, tiempos, recursos, costos, 
+                                 registros, numProductos);
                 }
                 break;
                 
             case 4:
-                if (numProductos == 0) {
-                    printf("Error: No hay productos registrados.\n");
-                } else {
-                    editarProducto(nombres, tiempos, recursos, cantidades, 
-                                 impuestos, registros, prioridades, numProductos);
-                    // Resetear cálculos previos cuando se edita un producto
-                    tiempoTotal = 0;
-                    recursosTotal = 0;
-                    impuestoTotal = 0;
-                }
-                break;
-                
-            case 5:
                 if (numProductos == 0) {
                     printf("Error: No hay productos registrados.\n");
                 } else {
@@ -176,70 +153,25 @@ int main() {
                     buscarProducto(nombres, numProductos, nombreBuscar, &indiceBusqueda);
                     
                     if (indiceBusqueda != -1) {
-                        eliminarProducto(nombres, tiempos, recursos, cantidades, 
-                                       impuestos, registros, prioridades, 
-                                       &numProductos, indiceBusqueda);
+                        eliminarProducto(nombres, tiempos, recursos, costos, 
+                                       registros, &numProductos, indiceBusqueda);
                         printf("Producto '%s' eliminado correctamente.\n", nombreBuscar);
-                        // Resetear cálculos previos cuando se elimina un producto
-                        tiempoTotal = 0;
-                        recursosTotal = 0;
-                        impuestoTotal = 0;
                     } else {
                         printf("Error: Producto no encontrado.\n");
                     }
                 }
                 break;
                 
-            case 6:
+            case 5:
                 if (numProductos == 0) {
                     printf("No hay productos registrados.\n");
                 } else {
-                    mostrarProductos(nombres, tiempos, recursos, cantidades, 
-                                   impuestos, registros, prioridades, numProductos);
+                    mostrarProductos(nombres, tiempos, recursos, costos, 
+                                   registros, numProductos);
                 }
                 break;
                 
-            case 7:
-                if (numProductos == 0) {
-                    printf("Error: No hay productos registrados.\n");
-                } else {
-                    printf("\nIngrese el tiempo disponible (horas): ");
-                    scanf("%f", &tiempoDisponible);
-                    limpiarBuffer();
-                    
-                    printf("Ingrese los recursos disponibles (unidades): ");
-                    scanf("%f", &recursosDisponibles);
-                    limpiarBuffer();
-                    
-                    optimizarProduccion(nombres, tiempos, recursos, cantidades, 
-                                      prioridades, numProductos, 
-                                      tiempoDisponible, recursosDisponibles);
-                }
-                break;
-                
-            case 8:
-                if (numProductos == 0) {
-                    printf("Error: No hay productos registrados.\n");
-                } else {
-                    calcularCostoTotal(recursos, cantidades, impuestos, numProductos, 
-                                     &costoSinImpuesto, &impuestoTotal, &costoTotal);
-                    
-                    printf("\n--- CÁLCULO DE COSTOS ---\n");
-                    printf("Costo total sin impuestos: $%.2f\n", costoSinImpuesto);
-                    printf("Impuesto total a pagar: $%.2f\n", impuestoTotal);
-                    printf("Costo total con impuestos: $%.2f\n", costoTotal);
-                }
-                break;
-                
-            case 9:
-                if (numProductos == 0) {
-                    printf("Error: No hay productos registrados.\n");
-                } else {
-                    verificarRegistrosSanitarios(registros, numProductos);
-                }
-                break;
-                
-            case 10:
+            case 6:
                 printf("\nSaliendo del sistema. ¡Hasta pronto!\n");
                 break;
                 
@@ -247,23 +179,33 @@ int main() {
                 printf("Opción inválida. Intente nuevamente.\n");
         }
         
-        if (opcion != 10) {
+        if (opcion != 6) {
             printf("\nPresione Enter para continuar...");
             getchar();
         }
         
-    } while (opcion != 10);
+    } while (opcion != 6);
     
     return 0;
+}
+
+/**
+ * Imprime una línea de caracteres
+ */
+void imprimirLinea(int longitud, char caracter) {
+    int i;
+    for (i = 0; i < longitud; i++) {
+        printf("%c", caracter);
+    }
+    printf("\n");
 }
 
 /**
  * Ingresa información de productos al sistema
  */
 void ingresarProductos(char nombres[][MAX_NOMBRE], float tiempos[], float recursos[], 
-                     int cantidades[], float impuestos[], char registros[][MAX_REGISTRO],
-                     int prioridades[], int* numProductos) {
-    int i, j, encontrado;
+                     float costos[], char registros[][MAX_REGISTRO], int* numProductos) {
+    int j, encontrado;
     char buffer[MAX_NOMBRE];
     
     if (*numProductos >= MAX_PRODUCTOS) {
@@ -307,10 +249,10 @@ void ingresarProductos(char nombres[][MAX_NOMBRE], float tiempos[], float recurs
         printf("Tiempo de fabricación por unidad (horas): ");
         if (scanf("%f", &tiempos[*numProductos]) != 1 || tiempos[*numProductos] <= 0) {
             printf("Error: Ingrese un valor numérico positivo.\n");
-            limpiarBuffer();
+            fflush(stdin);
             continue;
         }
-        limpiarBuffer();
+        fflush(stdin);
         break;
     } while (1);
     
@@ -319,94 +261,139 @@ void ingresarProductos(char nombres[][MAX_NOMBRE], float tiempos[], float recurs
         printf("Recursos necesarios por unidad: ");
         if (scanf("%f", &recursos[*numProductos]) != 1 || recursos[*numProductos] <= 0) {
             printf("Error: Ingrese un valor numérico positivo.\n");
-            limpiarBuffer();
+            fflush(stdin);
             continue;
         }
-        limpiarBuffer();
+        fflush(stdin);
         break;
     } while (1);
     
-    // Ingresar cantidad demandada
+    // Ingresar costo por unidad
     do {
-        printf("Cantidad demandada: ");
-        if (scanf("%d", &cantidades[*numProductos]) != 1 || cantidades[*numProductos] <= 0) {
-            printf("Error: Ingrese un valor entero positivo.\n");
-            limpiarBuffer();
+        printf("Costo por unidad ($): ");
+        if (scanf("%f", &costos[*numProductos]) != 1 || costos[*numProductos] <= 0) {
+            printf("Error: Ingrese un valor numérico positivo.\n");
+            fflush(stdin);
             continue;
         }
-        limpiarBuffer();
+        fflush(stdin);
         break;
     } while (1);
     
-    // Ingresar porcentaje de impuesto (nuevo)
-    do {
-        printf("Porcentaje de impuesto (%%): ");
-        if (scanf("%f", &impuestos[*numProductos]) != 1 || impuestos[*numProductos] < 0) {
-            printf("Error: Ingrese un valor numérico no negativo.\n");
-            limpiarBuffer();
-            continue;
-        }
-        limpiarBuffer();
-        break;
-    } while (1);
-    
-    // Ingresar registro sanitario (nuevo)
-    do {
-        printf("Registro sanitario (formato RS-XXXXX): ");
-        fgets(registros[*numProductos], MAX_REGISTRO, stdin);
-        registros[*numProductos][strcspn(registros[*numProductos], "\n")] = '\0'; // Eliminar salto de línea
-        
-        if (!validarRegistroSanitario(registros[*numProductos])) {
-            printf("Error: Formato inválido. Debe ser RS-XXXXX donde X son dígitos.\n");
-            continue;
-        }
-        break;
-    } while (1);
-    
-    // Ingresar prioridad de producción (nuevo)
-    do {
-        printf("Prioridad de producción (1-5, donde 1 es máxima prioridad): ");
-        if (scanf("%d", &prioridades[*numProductos]) != 1 || 
-            prioridades[*numProductos] < 1 || prioridades[*numProductos] > 5) {
-            printf("Error: Ingrese un valor entre 1 y 5.\n");
-            limpiarBuffer();
-            continue;
-        }
-        limpiarBuffer();
-        break;
-    } while (1);
+    // Ingresar registro sanitario simplificado
+    printf("Registro sanitario: ");
+    fgets(registros[*numProductos], MAX_REGISTRO, stdin);
+    registros[*numProductos][strcspn(registros[*numProductos], "\n")] = '\0'; // Eliminar salto de línea
     
     (*numProductos)++;
     printf("\nProducto registrado correctamente.\n");
 }
 
 /**
- * Calcula los requerimientos totales de tiempo, recursos e impuestos
+ * Calcula los requerimientos totales de tiempo, recursos, costos e impuestos
  */
-void calcularRequerimientos(float tiempos[], float recursos[], int cantidades[], 
-                         float impuestos[], int numProductos, float* tiempoTotal, 
-                         float* recursosTotal, float* impuestoTotal) {
-    int i;
-    *tiempoTotal = 0;
-    *recursosTotal = 0;
-    *impuestoTotal = 0;
+void calcularRequerimientos(float tiempo, float recurso, 
+                         int cantidad, float costo, float impuesto,
+                         float* tiempoTotal, float* recursosTotal, float* costoTotal, 
+                         float* impuestoTotal) {
+    *tiempoTotal = tiempo * cantidad;
+    *recursosTotal = recurso * cantidad;
     
-    for (i = 0; i < numProductos; i++) {
-        *tiempoTotal += tiempos[i] * cantidades[i];
-        *recursosTotal += recursos[i] * cantidades[i];
-        *impuestoTotal += (recursos[i] * cantidades[i]) * (impuestos[i] / 100.0);
-    }
+    float costoProd = costo * cantidad;
+    *impuestoTotal = costoProd * (impuesto / 100.0);
+    
+    *costoTotal = costoProd + *impuestoTotal;
 }
 
 /**
  * Verifica si es posible cumplir con la producción dados los límites
+ * y genera una factura con los costos e impuestos
  */
-int verificarFactibilidad(float tiempoTotal, float recursosTotal, 
-                       float tiempoDisponible, float recursosDisponibles) {
-    if (tiempoTotal <= tiempoDisponible && recursosTotal <= recursosDisponibles) {
-        return 1; // Factible
+void verificarFactibilidad(char nombres[][MAX_NOMBRE], float tiempos[], float recursos[], 
+                        float costos[], char registros[][MAX_REGISTRO], int indice, int cantidad, 
+                        float tiempoDisponible, float recursosDisponibles, float impuesto) {
+    float tiempoTotal = 0, recursosTotal = 0, costoTotal = 0, impuestoTotal = 0;
+    
+    // Calcular requerimientos
+    calcularRequerimientos(tiempos[indice], recursos[indice], cantidad, costos[indice], 
+                         impuesto, &tiempoTotal, &recursosTotal, &costoTotal, &impuestoTotal);
+    
+    int factible = 1;
+    float tiempoFaltante = 0;
+    float recursosFaltantes = 0;
+    
+    if (tiempoTotal > tiempoDisponible) {
+        tiempoFaltante = tiempoTotal - tiempoDisponible;
+        factible = 0;
+    }
+    
+    if (recursosTotal > recursosDisponibles) {
+        recursosFaltantes = recursosTotal - recursosDisponibles;
+        factible = 0;
+    }
+    
+    // Imprimir factura bonita
+    int anchoFactura = 60;
+    
+    printf("\n");
+    imprimirLinea(anchoFactura, '*');
+    printf("*%*s%*s*\n", anchoFactura/2 + 10, "FACTURA PROYECTADA", anchoFactura/2 - 10, "");
+    imprimirLinea(anchoFactura, '*');
+    printf("* %-20s %-35s *\n", "Producto:", nombres[indice]);
+    printf("* %-20s %-35s *\n", "Registro Sanitario:", registros[indice]);
+    imprimirLinea(anchoFactura, '-');
+    printf("* %-20s %-35d *\n", "Cantidad:", cantidad);
+    printf("* %-20s $%-34.2f *\n", "Precio Unitario:", costos[indice]);
+    imprimirLinea(anchoFactura, '-');
+    printf("* %-20s %-35.2f *\n", "Tiempo por Unidad:", tiempos[indice]);
+    printf("* %-20s %-35.2f *\n", "Tiempo Total:", tiempoTotal);
+    printf("* %-20s %-35.2f *\n", "Recursos por Unidad:", recursos[indice]);
+    printf("* %-20s %-35.2f *\n", "Recursos Totales:", recursosTotal);
+    imprimirLinea(anchoFactura, '-');
+    printf("* %-20s $%-34.2f *\n", "Subtotal:", costoTotal - impuestoTotal);
+    printf("* %-20s %%%-34.1f *\n", "Tasa de Impuesto:", impuesto);
+    printf("* %-20s $%-34.2f *\n", "Impuesto:", impuestoTotal);
+    imprimirLinea(anchoFactura, '=');
+    printf("* %-20s $%-34.2f *\n", "TOTAL:", costoTotal);
+    imprimirLinea(anchoFactura, '*');
+    
+    if (factible) {
+        printf("\n");
+        imprimirLinea(anchoFactura, '#');
+        printf("#%*s%*s#\n", anchoFactura/2 + 10, "¡PRODUCCIÓN FACTIBLE!", anchoFactura/2 - 10, "");
+        printf("#%*s%*s#\n", anchoFactura/2 + 15, "Es posible cumplir con la producción", anchoFactura/2 - 15, "");
+        printf("#%*s%*s#\n", anchoFactura/2 + 13, "con los recursos disponibles", anchoFactura/2 - 13, "");
+        imprimirLinea(anchoFactura, '#');
     } else {
-        return 0; // No factible
+        printf("\n");
+        imprimirLinea(anchoFactura, '!');
+        printf("!%*s%*s!\n", anchoFactura/2 + 11, "¡PRODUCCIÓN NO FACTIBLE!", anchoFactura/2 - 11, "");
+        imprimirLinea(anchoFactura, '!');
+        
+        if (tiempoFaltante > 0) {
+            printf("! %-56s !\n", "TIEMPO INSUFICIENTE:");
+            printf("! %-20s %-35.2f !\n", "- Tiempo Disponible:", tiempoDisponible);
+            printf("! %-20s %-35.2f !\n", "- Tiempo Necesario:", tiempoTotal);
+            printf("! %-20s %-35.2f !\n", "- Tiempo Faltante:", tiempoFaltante);
+            imprimirLinea(anchoFactura, '-');
+        }
+        
+        if (recursosFaltantes > 0) {
+            printf("! %-56s !\n", "RECURSOS INSUFICIENTES:");
+            printf("! %-20s %-35.2f !\n", "- Recursos Disponibles:", recursosDisponibles);
+            printf("! %-20s %-35.2f !\n", "- Recursos Necesarios:", recursosTotal);
+            printf("! %-20s %-35.2f !\n", "- Recursos Faltantes:", recursosFaltantes);
+            imprimirLinea(anchoFactura, '-');
+        }
+        
+        // Calcular posibles impuestos adicionales por producción urgente
+        float impuestoUrgencia = (costoTotal - impuestoTotal) * 0.05; // 5% adicional por urgencia
+        float totalUrgente = costoTotal + impuestoUrgencia;
+        
+        printf("! %-56s !\n", "COSTOS ADICIONALES POR PRODUCCIÓN URGENTE:");
+        printf("! %-20s $%-34.2f !\n", "- Impuesto Urgencia:", impuestoUrgencia);
+        printf("! %-20s $%-34.2f !\n", "- TOTAL con Urgencia:", totalUrgente);
+        imprimirLinea(anchoFactura, '!');
     }
 }
 
@@ -430,8 +417,8 @@ void buscarProducto(char nombres[][MAX_NOMBRE], int numProductos,
  * Permite editar la información de un producto existente
  */
 void editarProducto(char nombres[][MAX_NOMBRE], float tiempos[], 
-                  float recursos[], int cantidades[], float impuestos[],
-                  char registros[][MAX_REGISTRO], int prioridades[], int numProductos) {
+                  float recursos[], float costos[], char registros[][MAX_REGISTRO], 
+                  int numProductos) {
     char nombreBuscar[MAX_NOMBRE];
     int indice = -1;
     int opcionEditar;
@@ -451,18 +438,16 @@ void editarProducto(char nombres[][MAX_NOMBRE], float tiempos[],
     printf("\nProducto encontrado: %s\n", nombres[indice]);
     printf("1. Editar tiempo de fabricación (actual: %.2f)\n", tiempos[indice]);
     printf("2. Editar recursos necesarios (actual: %.2f)\n", recursos[indice]);
-    printf("3. Editar cantidad demandada (actual: %d)\n", cantidades[indice]);
-    printf("4. Editar porcentaje de impuesto (actual: %.2f%%)\n", impuestos[indice]);
-    printf("5. Editar registro sanitario (actual: %s)\n", registros[indice]);
-    printf("6. Editar prioridad (actual: %d)\n", prioridades[indice]);
+    printf("3. Editar costo por unidad (actual: $%.2f)\n", costos[indice]);
+    printf("4. Editar registro sanitario (actual: %s)\n", registros[indice]);
     printf("Seleccione dato a editar: ");
     
     if (scanf("%d", &opcionEditar) != 1) {
         printf("Entrada inválida. Operación cancelada.\n");
-        limpiarBuffer();
+        fflush(stdin);
         return;
     }
-    limpiarBuffer();
+    fflush(stdin);
     
     switch (opcionEditar) {
         case 1:
@@ -470,10 +455,10 @@ void editarProducto(char nombres[][MAX_NOMBRE], float tiempos[],
                 printf("Nuevo tiempo de fabricación: ");
                 if (scanf("%f", &tiempos[indice]) != 1 || tiempos[indice] <= 0) {
                     printf("Error: Ingrese un valor numérico positivo.\n");
-                    limpiarBuffer();
+                    fflush(stdin);
                     continue;
                 }
-                limpiarBuffer();
+                fflush(stdin);
                 break;
             } while (1);
             break;
@@ -483,66 +468,31 @@ void editarProducto(char nombres[][MAX_NOMBRE], float tiempos[],
                 printf("Nuevos recursos necesarios: ");
                 if (scanf("%f", &recursos[indice]) != 1 || recursos[indice] <= 0) {
                     printf("Error: Ingrese un valor numérico positivo.\n");
-                    limpiarBuffer();
+                    fflush(stdin);
                     continue;
                 }
-                limpiarBuffer();
+                fflush(stdin);
                 break;
             } while (1);
             break;
             
         case 3:
             do {
-                printf("Nueva cantidad demandada: ");
-                if (scanf("%d", &cantidades[indice]) != 1 || cantidades[indice] <= 0) {
-                    printf("Error: Ingrese un valor entero positivo.\n");
-                    limpiarBuffer();
+                printf("Nuevo costo por unidad: ");
+                if (scanf("%f", &costos[indice]) != 1 || costos[indice] <= 0) {
+                    printf("Error: Ingrese un valor numérico positivo.\n");
+                    fflush(stdin);
                     continue;
                 }
-                limpiarBuffer();
+                fflush(stdin);
                 break;
             } while (1);
             break;
             
         case 4:
-            do {
-                printf("Nuevo porcentaje de impuesto: ");
-                if (scanf("%f", &impuestos[indice]) != 1 || impuestos[indice] < 0) {
-                    printf("Error: Ingrese un valor numérico no negativo.\n");
-                    limpiarBuffer();
-                    continue;
-                }
-                limpiarBuffer();
-                break;
-            } while (1);
-            break;
-            
-        case 5:
-            do {
-                printf("Nuevo registro sanitario (formato RS-XXXXX): ");
-                fgets(registros[indice], MAX_REGISTRO, stdin);
-                registros[indice][strcspn(registros[indice], "\n")] = '\0'; // Eliminar salto de línea
-                
-                if (!validarRegistroSanitario(registros[indice])) {
-                    printf("Error: Formato inválido. Debe ser RS-XXXXX donde X son dígitos.\n");
-                    continue;
-                }
-                break;
-            } while (1);
-            break;
-            
-        case 6:
-            do {
-                printf("Nueva prioridad (1-5): ");
-                if (scanf("%d", &prioridades[indice]) != 1 || 
-                    prioridades[indice] < 1 || prioridades[indice] > 5) {
-                    printf("Error: Ingrese un valor entre 1 y 5.\n");
-                    limpiarBuffer();
-                    continue;
-                }
-                limpiarBuffer();
-                break;
-            } while (1);
+            printf("Nuevo registro sanitario: ");
+            fgets(registros[indice], MAX_REGISTRO, stdin);
+            registros[indice][strcspn(registros[indice], "\n")] = '\0'; // Eliminar salto de línea
             break;
             
         default:
@@ -557,8 +507,7 @@ void editarProducto(char nombres[][MAX_NOMBRE], float tiempos[],
  * Elimina un producto y reorganiza los arreglos
  */
 void eliminarProducto(char nombres[][MAX_NOMBRE], float tiempos[], 
-                    float recursos[], int cantidades[], float impuestos[],
-                    char registros[][MAX_REGISTRO], int prioridades[], 
+                    float recursos[], float costos[], char registros[][MAX_REGISTRO], 
                     int* numProductos, int indice) {
     int i;
     
@@ -572,9 +521,7 @@ void eliminarProducto(char nombres[][MAX_NOMBRE], float tiempos[],
         strcpy(registros[i], registros[i + 1]);
         tiempos[i] = tiempos[i + 1];
         recursos[i] = recursos[i + 1];
-        cantidades[i] = cantidades[i + 1];
-        impuestos[i] = impuestos[i + 1];
-        prioridades[i] = prioridades[i + 1];
+        costos[i] = costos[i + 1];
     }
     
     (*numProductos)--; // Reducir el contador de productos
@@ -584,186 +531,21 @@ void eliminarProducto(char nombres[][MAX_NOMBRE], float tiempos[],
  * Muestra todos los productos registrados
  */
 void mostrarProductos(char nombres[][MAX_NOMBRE], float tiempos[], 
-                    float recursos[], int cantidades[], float impuestos[],
-                    char registros[][MAX_REGISTRO], int prioridades[], int numProductos) {
+                    float recursos[], float costos[], char registros[][MAX_REGISTRO], 
+                    int numProductos) {
     int i;
     
     printf("\n--- LISTADO DE PRODUCTOS ---\n");
-    printf("%-15s %-10s %-10s %-10s %-10s %-15s %-10s\n", 
-          "Nombre", "Tiempo(h)", "Recursos", "Demanda", "Impuesto", "Reg. Sanitario", "Prioridad");
-    printf("---------------------------------------------------------------------------------\n");
+    imprimirLinea(70, '-');
+    printf("%-15s %-10s %-10s %-10s %-15s\n", 
+          "Nombre", "Tiempo(h)", "Recursos", "Costo($)", "Reg. Sanitario");
+    imprimirLinea(70, '-');
     
     for (i = 0; i < numProductos; i++) {
-        printf("%-15s %-10.2f %-10.2f %-10d %-10.2f %-15s %-10d\n", 
-              nombres[i], tiempos[i], recursos[i], cantidades[i], 
-              impuestos[i], registros[i], prioridades[i]);
+        printf("%-15s %-10.2f %-10.2f %-10.2f %-15s\n", 
+              nombres[i], tiempos[i], recursos[i], costos[i], registros[i]);
     }
+    
+    imprimirLinea(70, '-');
 }
 
-/**
- * Limpia el buffer de entrada
- */
-void limpiarBuffer() {
-    int c;
-    while ((c = getchar()) != '\n' && c != EOF);
-}
-
-/**
- * Optimiza el plan de producción según prioridades y recursos disponibles
- */
-void optimizarProduccion(char nombres[][MAX_NOMBRE], float tiempos[], 
-                       float recursos[], int cantidades[], int prioridades[], 
-                       int numProductos, float tiempoDisponible, float recursosDisponibles) {
-    int i, j;
-    int indicesMayor[MAX_PRODUCTOS];
-    int cantidadesOptimizadas[MAX_PRODUCTOS];
-    float tiempoUsado = 0;
-    float recursosUsados = 0;
-    
-    // Inicializar arreglos
-    for (i = 0; i < numProductos; i++) {
-        indicesMayor[i] = i;
-        cantidadesOptimizadas[i] = 0;
-    }
-    
-    // Ordenar productos por prioridad (1 es máxima prioridad)
-    for (i = 0; i < numProductos - 1; i++) {
-        for (j = 0; j < numProductos - i - 1; j++) {
-            if (prioridades[indicesMayor[j]] > prioridades[indicesMayor[j + 1]]) {
-                int temp = indicesMayor[j];
-                indicesMayor[j] = indicesMayor[j + 1];
-                indicesMayor[j + 1] = temp;
-            }
-        }
-    }
-    
-    printf("\n--- PLAN DE PRODUCCIÓN OPTIMIZADO ---\n");
-    printf("Optimizando según prioridades y recursos disponibles...\n\n");
-    
-    // Asignar recursos según prioridad
-    for (i = 0; i < numProductos; i++) {
-        int idx = indicesMayor[i];
-        int maxUnidades = cantidades[idx]; // Demanda máxima
-        int unidadesPosibles = 0;
-        
-        // Calcular cuántas unidades podemos producir con el tiempo disponible
-        if (tiempos[idx] > 0) {
-            int porTiempo = (int)((tiempoDisponible - tiempoUsado) / tiempos[idx]);
-            if (porTiempo < maxUnidades) {
-                maxUnidades = porTiempo;
-            }
-        }
-        
-        // Calcular cuántas unidades podemos producir con los recursos disponibles
-        if (recursos[idx] > 0) {
-            int porRecursos = (int)((recursosDisponibles - recursosUsados) / recursos[idx]);
-            if (porRecursos < maxUnidades) {
-                maxUnidades = porRecursos;
-            }
-        }
-        
-        // Si no podemos producir ninguna unidad, continuamos con el siguiente producto
-        if (maxUnidades <= 0) {
-            continue;
-        }
-        
-        // Asignar unidades
-        cantidadesOptimizadas[idx] = maxUnidades;
-        tiempoUsado += tiempos[idx] * maxUnidades;
-        recursosUsados += recursos[idx] * maxUnidades;
-    }
-    
-    // Mostrar plan optimizado
-    printf("%-15s %-15s %-15s %-15s %-15s\n", 
-          "Producto", "Prioridad", "Demanda", "Optimizado", "% Satisfecho");
-    printf("-----------------------------------------------------------------------\n");
-    
-    for (i = 0; i < numProductos; i++) {
-        float porcentaje = 0;
-        if (cantidades[i] > 0) {
-            porcentaje = ((float)cantidadesOptimizadas[i] / cantidades[i]) * 100;
-        }
-        
-        printf("%-15s %-15d %-15d %-15d %-15.2f%%\n", 
-              nombres[i], prioridades[i], cantidades[i], 
-              cantidadesOptimizadas[i], porcentaje);
-    }
-    
-    printf("\nResumen de recursos:\n");
-    printf("- Tiempo disponible: %.2f horas, Utilizado: %.2f horas (%.2f%%)\n", 
-          tiempoDisponible, tiempoUsado, (tiempoUsado / tiempoDisponible) * 100);
-    printf("- Recursos disponibles: %.2f unidades, Utilizados: %.2f unidades (%.2f%%)\n", 
-          recursosDisponibles, recursosUsados, (recursosUsados / recursosDisponibles) * 100);
-}
-
-/**
- * Calcula el costo total incluyendo impuestos
- */
-void calcularCostoTotal(float recursos[], int cantidades[], float impuestos[], 
-                      int numProductos, float* costoSinImpuesto, float* impuestoTotal, 
-                      float* costoTotal) {
-    int i;
-    *costoSinImpuesto = 0;
-    *impuestoTotal = 0;
-    
-    for (i = 0; i < numProductos; i++) {
-        float costoProducto = recursos[i] * cantidades[i];
-        float impuestoProducto = costoProducto * (impuestos[i] / 100.0);
-        
-        *costoSinImpuesto += costoProducto;
-        *impuestoTotal += impuestoProducto;
-    }
-    
-    *costoTotal = *costoSinImpuesto + *impuestoTotal;
-}
-
-/**
- * Verifica la validez de los registros sanitarios
- */
-void verificarRegistrosSanitarios(char registros[][MAX_REGISTRO], int numProductos) {
-    int i;
-    int validos = 0;
-    int invalidos = 0;
-    
-    printf("\n--- VERIFICACIÓN DE REGISTROS SANITARIOS ---\n");
-    
-    for (i = 0; i < numProductos; i++) {
-        if (validarRegistroSanitario(registros[i])) {
-            printf("Producto %d: Registro %s - VÁLIDO\n", i + 1, registros[i]);
-            validos++;
-        } else {
-            printf("Producto %d: Registro %s - INVÁLIDO (No cumple formato RS-XXXXX)\n", 
-                  i + 1, registros[i]);
-            invalidos++;
-        }
-    }
-    
-    printf("\nResumen: %d registros válidos, %d registros inválidos\n", validos, invalidos);
-}
-
-/**
- * Valida el formato de un registro sanitario
- */
-int validarRegistroSanitario(char registro[]) {
-    int i;
-    int longitud = strlen(registro);
-    
-    // Verificar longitud mínima (RS- + al menos 1 dígito)
-    if (longitud < 4) {
-        return 0;
-    }
-    
-    // Verificar prefijo RS-
-    if (registro[0] != 'R' || registro[1] != 'S' || registro[2] != '-') {
-        return 0;
-    }
-    
-    // Verificar que el resto sean dígitos
-    for (i = 3; i < longitud; i++) {
-        if (registro[i] < '0' || registro[i] > '9') {
-            return 0;
-        }
-    }
-    
-    return 1;
-}
