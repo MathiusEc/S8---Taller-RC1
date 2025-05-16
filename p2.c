@@ -312,8 +312,7 @@ void ingresarComponente(char componentes[][30], float cantidades[], int *numComp
     int val;
 
     printf("\n--- REGISTRO DE COMPONENTE ---\n");
-    
-    // Leer nombre del componente
+
     do
     {
         printf("Nombre del componente: ");
@@ -336,7 +335,6 @@ void ingresarComponente(char componentes[][30], float cantidades[], int *numComp
         }
         else
         {
-            // Verificar si ya existe
             existe = 0;
             for (int i = 0; i < *numComponentes; i++)
             {
@@ -350,8 +348,7 @@ void ingresarComponente(char componentes[][30], float cantidades[], int *numComp
             }
         }
     } while (existe == 1);
-    
-    // Leer cantidad disponible
+
     do
     {
         printf("Cantidad disponible: ");
@@ -373,8 +370,7 @@ void ingresarComponente(char componentes[][30], float cantidades[], int *numComp
         break;
         
     } while (1);
-    
-    // Guardar el componente
+
     strcpy(componentes[*numComponentes], nombre);
     cantidades[*numComponentes] = cantidad;
     (*numComponentes)++;
@@ -443,7 +439,6 @@ void ingresarProducto(char nombres[][30], float tiempos[], char registros[][30],
 
     printf("\n--- REGISTRO DE PRODUCTO ---\n");
     
-    // Inicializar requerimientos de componentes a 0
     for (int j = 0; j < numComponentes; j++)
     {
         requerimientosComp[*numProductos][j] = 0;
