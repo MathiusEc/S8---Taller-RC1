@@ -1,19 +1,11 @@
+#define MAX_PRODUCTOS 5
+#define MAX_COMPONENTES 10
+#define TASA_IMPUESTO_BASE 16.0 // Bienes y servicios utilizados en la producción
 
+int mostrarMenu();
 
-int menu();
-
-//opcion 1
-int productoExiste(char nombres[][30], int numProductos, char *producto);
-void leerNombreProducto(char nombres[][30], int numProductos, char *nombre);
-float leerTiempoFabricacion();
-float leerRecursosNecesarios();
-float leerCostoUnidad();
-void leerRegistroSanitario(char *registro);
-
-//opcion 2
-void calcularRequerimientos(float tiempo, float recurso, int cantidad, float costo, float impuesto,
-                            float *tiempoTotal, float *recursosTotal, float *costoTotal, float *impuestoTotal);
-void verificarFactibilidad(char nombres[][30], float tiempos[], float recursos[], float costos[], char registros[][30],
-                           int indice, int cantidad, float tiempoDisponible, float recursosDisponibles, float impuesto);
-  
-//opcion 3
+void ingresarComponente(char componentes[][30], float cantidades[], int *numComponentes);
+void mostrarComponentes(char componentes[][30], float cantidades[], int numComponentes);
+void ingresarProducto(char nombres[][30], float tiempos[], char registros[][30], 
+                      float costos[], int requerimientosComp[][MAX_COMPONENTES], 
+                      int *numProductos, char componentes[][30], float cantidades[], int numComponentes);
