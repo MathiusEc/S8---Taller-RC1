@@ -123,7 +123,7 @@ int main(int argc, char *argv[])
 
             printf("Ingrese la cantidad a producir: ");
             val = scanf("%d", &cantidad);
-            limpiarBuffer();
+            fflush(stdin);
 
             if (val != 1)
             {
@@ -169,7 +169,7 @@ int main(int argc, char *argv[])
                 if (respuesta == 'N' || respuesta == 'n')
                 {
                     printf("Proceso terminado.\n");
-                    return;
+                    break;
                 }
 
                 if (respuesta != 'S' && respuesta != 's')

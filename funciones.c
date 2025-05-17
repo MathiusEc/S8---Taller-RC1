@@ -262,7 +262,7 @@ void obtenerRegistroSanitario(char registro[])
         fgets(registro, 30, stdin);
         len = strlen(registro);
 
-        if (nombre[len - 1] == '\n')
+        if (registro[len - 1] == '\n')
         {
             if (registro[len - 1] == '\n')
             {
@@ -554,7 +554,7 @@ void editarComponentesProducto(char nombres[][30], int requerimientosComp[][MAX_
         {
             printf("%s (actual: %d): ", componentes[i], requerimientosComp[indiceProducto][i]);
             val = scanf("%d", &cantidadComp);
-            limpiarBuffer();
+            fflush(stdin);
             
             if (val != 1)
             {
