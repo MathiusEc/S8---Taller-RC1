@@ -30,7 +30,6 @@ int buscarProducto(char nombres[][30], int numProductos, char *nombre)
     return -1;
 }
 
-
 int mostrarMenu()
 {
     int opc;
@@ -69,13 +68,13 @@ void ingresarComponente(char componentes[][30], float cantidades[], int *numComp
     int val;
 
     printf("\n--- REGISTRO DE COMPONENTE ---\n");
-    
+
     do
     {
         printf("Nombre del componente: ");
         fgets(nombre, 30, stdin);
         len = strlen(nombre);
-        
+
         if (len > 0)
         {
             if (nombre[len - 1] == '\n')
@@ -84,7 +83,7 @@ void ingresarComponente(char componentes[][30], float cantidades[], int *numComp
                 len--;
             }
         }
-        
+
         if (len == 0)
         {
             printf("Error: El nombre no puede estar vacío.\n");
@@ -112,27 +111,27 @@ void ingresarComponente(char componentes[][30], float cantidades[], int *numComp
         printf("Cantidad disponible: ");
         val = scanf("%f", &cantidad);
         fflush(stdin);
-        
+
         if (val != 1)
         {
             printf("Error: Ingrese un valor numérico.\n");
             continue;
         }
-        
+
         if (cantidad <= 0)
         {
             printf("Error: La cantidad debe ser mayor que cero.\n");
             continue;
         }
-        
+
         break;
-        
+
     } while (val != 1 || cantidad <= 0);
 
     strcpy(componentes[*numComponentes], nombre);
     cantidades[*numComponentes] = cantidad;
     (*numComponentes)++;
-    
+
     printf("\nComponente registrado correctamente.\n");
 }
 
@@ -156,28 +155,36 @@ void mostrarComponentes(char componentes[][30], float cantidades[], int numCompo
 }
 
 // opcion3
-void obtenerNombreProducto(char nombre[], char nombres[][30], int numProductos) {
+void obtenerNombreProducto(char nombre[], char nombres[][30], int numProductos)
+{
     int len, existe;
 
-    do {
+    do
+    {
         printf("Nombre del producto: ");
         fgets(nombre, 30, stdin);
         len = strlen(nombre);
 
         // Eliminar el salto de línea si está presente
-        if (len > 0 && nombre[len - 1] == '\n') {
+        if (nombre[len - 1] == '\n')
+        {
             nombre[len - 1] = '\0';
-            len--;  // Reducir longitud correctamente
+            len--; // Reducir longitud correctamente
         }
 
-        if (len == 0) {
+        if (len == 0)
+        {
             printf("Error: El nombre no puede estar vacío.\n");
             existe = 1;
-        } else {
+        }
+        else
+        {
             // Verificar si el nombre ya existe
             existe = 0;
-            for (int i = 0; i < numProductos; i++) {
-                if (strcmp(nombres[i], nombre) == 0) {
+            for (int i = 0; i < numProductos; i++)
+            {
+                if (strcmp(nombres[i], nombre) == 0)
+                {
                     printf("Error: Ya existe un producto con ese nombre.\n");
                     existe = 1;
                     break;
@@ -187,143 +194,161 @@ void obtenerNombreProducto(char nombre[], char nombres[][30], int numProductos) 
     } while (existe == 1);
 }
 
-float obtenerTiempoFabricacion() {
+float obtenerTiempoFabricacion()
+{
     float tiempo;
     int val;
-    
-    do {
+
+    do
+    {
         printf("Tiempo de fabricación (horas): ");
         val = scanf("%f", &tiempo);
         fflush(stdin);
-        
-        if (val != 1) {
+
+        if (val != 1)
+        {
             printf("Error: Ingrese un valor numérico.\n");
             continue;
         }
-        
-        if (tiempo <= 0) {
+
+        if (tiempo <= 0)
+        {
             printf("Error: El tiempo debe ser mayor que cero.\n");
             continue;
         }
-        
+
         break;
-        
+
     } while (val != 1 || tiempo <= 0);
     return tiempo;
 }
 
-float obtenerCostoPorUnidad() {
+float obtenerCostoPorUnidad()
+{
     float costo;
     int val;
-    
-    do {
+
+    do
+    {
         printf("Costo por unidad ($): ");
         val = scanf("%f", &costo);
         fflush(stdin);
-        
-        if (val != 1) {
+
+        if (val != 1)
+        {
             printf("Error: Ingrese un valor numérico.\n");
             continue;
         }
-        
-        if (costo <= 0) {
+
+        if (costo <= 0)
+        {
             printf("Error: El costo debe ser mayor que cero.\n");
             continue;
         }
-        
+
         break;
-        
+
     } while (val != 1 || costo <= 0);
     return costo;
 }
 
-void obtenerRegistroSanitario(char registro[]) {
+void obtenerRegistroSanitario(char registro[])
+{
     int len;
-    
-    do {
+
+    do
+    {
         printf("Registro sanitario: ");
         fgets(registro, 30, stdin);
         len = strlen(registro);
-        
-        if (len > 0) {
-            if (registro[len - 1] == '\n') {
+
+        if (nombre[len - 1] == '\n')
+        {
+            if (registro[len - 1] == '\n')
+            {
                 registro[len - 1] = '\0';
                 len = len - 1;
             }
         }
-        
-        if (len == 0) {
+
+        if (len == 0)
+        {
             printf("Error: El registro sanitario no puede estar vacío.\n");
             continue;
         }
-        
+
         break;
-        
+
     } while (1);
 }
 
-void mostrarComponentesDisponibles(char componentes[][30], float cantidades[], int numComponentes) {
+void mostrarComponentesDisponibles(char componentes[][30], float cantidades[], int numComponentes)
+{
     printf("\nComponentes disponibles en inventario:\n");
-    for (int i = 0; i < numComponentes; i++) {
+    for (int i = 0; i < numComponentes; i++)
+    {
         printf("%d. %s (%.2f unidades disponibles)\n", i + 1, componentes[i], cantidades[i]);
     }
 }
 
 void obtenerRequerimientosComponentes(int requerimientosComp[][MAX_COMPONENTES], int numProducto,
-                                      char componentes[][30], int numComponentes) {
+                                      char componentes[][30], int numComponentes)
+{
     int cantidadComp;
     int val;
-    
+
     printf("\nIngrese la cantidad requerida de cada componente para este producto:\n");
-    for (int i = 0; i < numComponentes; i++) {
-        do {
+    for (int i = 0; i < numComponentes; i++)
+    {
+        do
+        {
             printf("%s: ", componentes[i]);
             val = scanf("%d", &cantidadComp);
             fflush(stdin);
-            
-            if (val != 1) {
+
+            if (val != 1)
+            {
                 printf("Error: Ingrese un valor numérico.\n");
                 continue;
             }
-            
-            if (cantidadComp < 0) {
+
+            if (cantidadComp < 0)
+            {
                 printf("Error: La cantidad no puede ser negativa.\n");
                 continue;
             }
-            
+
             requerimientosComp[numProducto][i] = cantidadComp;
             break;
-            
+
         } while (val != 1 || cantidadComp < 0);
     }
 }
 
 // opcion4
 int verificarFactibilidad(char nombres[][30], float tiempos[], char registros[][30],
-                         float costos[], int requerimientosComp[][MAX_COMPONENTES],
-                         int indice, int cantidad, float tiempoDisponible,
-                         char componentes[][30], float cantidades[], int numComponentes,
-                         float *tiempoTotal, float *costoTotal, float *impuestoTotal, 
-                         float *totalConImpuesto, float *tiempoFaltante,
-                         int componentesFaltantes[], int *hayFaltantes)
+                          float costos[], int requerimientosComp[][MAX_COMPONENTES],
+                          int indice, int cantidad, float tiempoDisponible,
+                          char componentes[][30], float cantidades[], int numComponentes,
+                          float *tiempoTotal, float *costoTotal, float *impuestoTotal,
+                          float *totalConImpuesto, float *tiempoFaltante,
+                          int componentesFaltantes[], int *hayFaltantes)
 {
     *tiempoTotal = tiempos[indice] * cantidad;
     *costoTotal = costos[indice] * cantidad;
     *impuestoTotal = (*costoTotal) * (TASA_IMPUESTO_BASE / 100.0);
     *totalConImpuesto = (*costoTotal) + (*impuestoTotal);
-    
+
     int factible = 1;
     *tiempoFaltante = 0;
     *hayFaltantes = 0;
-    
-    // Verificar tiempo
+
     if (*tiempoTotal > tiempoDisponible)
     {
         *tiempoFaltante = (*tiempoTotal) - tiempoDisponible;
         factible = 0;
     }
-    
-    // Verificar componentes
+
     for (int i = 0; i < numComponentes; i++)
     {
         componentesFaltantes[i] = 0;
@@ -335,15 +360,15 @@ int verificarFactibilidad(char nombres[][30], float tiempos[], char registros[][
             factible = 0;
         }
     }
-    
+
     return factible;
 }
 
 void imprimirFactura(char nombres[][30], char registros[][30], int indice, int cantidad,
-                    float tiempos[], float tiempoTotal, float costos[],
-                    float costoTotal, float impuestoTotal, float totalConImpuesto,
-                    char componentes[][30], float cantidades[], int requerimientosComp[][MAX_COMPONENTES],
-                    int componentesFaltantes[], int numComponentes)
+                     float tiempos[], float tiempoTotal, float costos[],
+                     float costoTotal, float impuestoTotal, float totalConImpuesto,
+                     char componentes[][30], float cantidades[], int requerimientosComp[][MAX_COMPONENTES],
+                     int componentesFaltantes[], int numComponentes)
 {
     printf("\n=================================================\n");
     printf("            FACTURA PROYECTADA\n");
@@ -356,7 +381,7 @@ void imprimirFactura(char nombres[][30], char registros[][30], int indice, int c
     printf("Tiempo Total:       %.2f horas\n", tiempoTotal);
     printf("-------------------------------------------------\n");
     printf("Componentes requeridos:\n");
-    
+
     for (int i = 0; i < numComponentes; i++)
     {
         if (requerimientosComp[indice][i] > 0)
@@ -366,7 +391,7 @@ void imprimirFactura(char nombres[][30], char registros[][30], int indice, int c
             printf("\n");
         }
     }
-    
+
     printf("-------------------------------------------------\n");
     printf("Precio Unitario:    $%.2f\n", costos[indice]);
     printf("Subtotal:           $%.2f\n", costoTotal);
@@ -377,43 +402,85 @@ void imprimirFactura(char nombres[][30], char registros[][30], int indice, int c
     printf("=================================================\n");
 }
 
-
-
-void mostrarResultadoFactibilidad(int factible, float tiempoDisponible, float tiempoTotal, 
-                                 float tiempoFaltante, int hayFaltantes, 
-                                 char componentes[][30], int componentesFaltantes[], int numComponentes)
+void ejecutarProduccion(char nombres[][30], float tiempos[], char registros[][30],
+                        float costos[], int requerimientosComp[][MAX_COMPONENTES],
+                        int indice, int cantidad, char componentes[][30], float cantidades[],
+                        int numComponentes)
 {
-    // Evaluación de factibilidad
-    if (factible == 1)
+    // Descontar componentes del inventario
+    for (int i = 0; i < numComponentes; i++)
     {
-        printf("\n¡PRODUCCIÓN FACTIBLE!\n");
-        printf("Es posible cumplir con la producción con los recursos disponibles.\n");
+        int requerido = requerimientosComp[indice][i] * cantidad;
+        cantidades[i] = cantidades[i] - requerido;
     }
-    else
+
+    float costoTotal = costos[indice] * cantidad;
+    float impuestoTotal = costoTotal * (TASA_IMPUESTO_BASE / 100.0);
+    float totalConImpuesto = costoTotal + impuestoTotal;
+
+    printf("\nComponentes utilizados y descontados del inventario:\n");
+    for (int i = 0; i < numComponentes; i++)
     {
-        printf("\n¡PRODUCCIÓN NO FACTIBLE!\n");
-        
-        if (tiempoFaltante > 0)
+        if (requerimientosComp[indice][i] > 0)
         {
-            printf("\nTIEMPO INSUFICIENTE:\n");
-            printf("- Tiempo Disponible:  %.2f horas\n", tiempoDisponible);
-            printf("- Tiempo Necesario:   %.2f horas\n", tiempoTotal);
-            printf("- Tiempo Faltante:    %.2f horas\n", tiempoFaltante);
-        }
-        
-        if (hayFaltantes == 1)
-        {
-            printf("\nCOMPONENTES INSUFICIENTES:\n");
-            for (int i = 0; i < numComponentes; i++)
-            {
-                if (componentesFaltantes[i] > 0)
-                {
-                    printf("- %s: faltan %d unidades\n", componentes[i], componentesFaltantes[i]);
-                }
-            }
+            int utilizado = requerimientosComp[indice][i] * cantidad;
+            printf("- %s: %d unidades (Quedan: %.2f)\n",
+                   componentes[i], utilizado, cantidades[i]);
         }
     }
+
+    printf("\nInventario actualizado correctamente.\n");
 }
 
+// opcion6
+void eliminarProducto(char nombres[][30], float tiempos[], char registros[][30],
+                      float costos[], int requerimientosComp[][MAX_COMPONENTES],
+                      int *numProductos)
+{
+    char nombreEliminar[30];
+    int indice, len;
 
+    printf("\n--- ELIMINAR PRODUCTO ---\n");
 
+    // Mostrar productos disponibles
+    printf("Productos disponibles:\n");
+    for (int i = 0; i < *numProductos; i++)
+    {
+        printf("%d. %s\n", i + 1, nombres[i]);
+    }
+
+    printf("\nIngrese el nombre del producto a eliminar: ");
+    fgets(nombreEliminar, 30, stdin);
+    len = strlen(nombreEliminar);
+    if (nombreEliminar[len - 1] == '\n')
+    {
+        nombreEliminar[len - 1] = '\0';
+        len--;
+    }
+
+    indice = buscarProducto(nombres, *numProductos, nombreEliminar);
+
+    if (indice == -1)
+    {
+        printf("Error: Producto no encontrado.\n");
+        return;
+    }
+
+    // Eliminar producto moviendo los elementos posteriores una posición hacia atrás
+    for (int i = indice; i < *numProductos - 1; i++)
+    {
+        strcpy(nombres[i], nombres[i + 1]);
+        tiempos[i] = tiempos[i + 1];
+        strcpy(registros[i], registros[i + 1]);
+        costos[i] = costos[i + 1];
+
+        for (int j = 0; j < MAX_COMPONENTES; j++)
+        {
+            requerimientosComp[i][j] = requerimientosComp[i + 1][j];
+        }
+    }
+
+    (*numProductos)--;
+
+    printf("\nProducto '%s' eliminado correctamente.\n", nombreEliminar);
+}
