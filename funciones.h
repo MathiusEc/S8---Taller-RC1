@@ -31,27 +31,21 @@ void imprimirFactura(char nombres[][30], char registros[][30], int indice, int c
                      char componentes[][30], float cantidades[], int requerimientosComp[][MAX_COMPONENTES],
                      int componentesFaltantes[], int numComponentes);
 
-void mostrarResultadoFactibilidad(int factible,
-    float tiempoDisponible,
-    float tiempoTotal,
-    float tiempoFaltante,
-    int hayFaltantes,
-    char componentes[][30],
-    int componentesFaltantes[],
-    int numComponentes,
-    char nombres[][30],
-    char registros[][30],
-    int indice,
-    int cantidad,
-    float tiempos[],
-    float costos[],
-    float costoTotal,
-    float impuestoTotal,
-    float totalConImpuesto,
-    float cantidades[],
-    int requerimientosComp[][MAX_COMPONENTES]);
+void ejecutarProduccion(char nombres[][30], float tiempos[], char registros[][30], 
+                      float costos[], int requerimientosComp[][MAX_COMPONENTES], 
+                      int indice, int cantidad, char componentes[][30], float cantidades[], 
+                      int numComponentes);
 
-    
+
+void eliminarProducto(char nombres[][30], float tiempos[], char registros[][30],
+                      float costos[], int requerimientosComp[][MAX_COMPONENTES],
+                      int *numProductos);
+
+void editarComponentesProducto(char nombres[][30], int requerimientosComp[][MAX_COMPONENTES], 
+                             int numProductos, char componentes[][30], float cantidades[], 
+                             int numComponentes);
+
+void aumentarInventario(char componentes[][30], float cantidades[], int numComponentes);
 
 
             
