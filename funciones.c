@@ -34,7 +34,7 @@ int mostrarMenu()
 {
     int opc;
     printf("\n==============================\n");
-    printf("      MENU PRINCIPAL\n");
+    printf("      SIGEPRO-EC\n");
     printf("==============================\n");
     printf("1. Ingresar componente al inventario\n");
     printf("2. Mostrar inventario de componentes\n");
