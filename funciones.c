@@ -617,7 +617,7 @@ void aumentarInventario(char componentes[][30], float cantidades[], int numCompo
         return;
     }
     
-    int indice = opcion--;
+    int indice = opcion-1;
     
     do
     {

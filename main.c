@@ -212,9 +212,19 @@ int main(int argc, char *argv[])
                     else
                     {
                         printf("\nNo se puede ejecutar la producción debido a recursos insuficientes.\n");
-                    }
+                        printf("Faltantes:\n");
+                        for (int i = 0; i < numComponentes; i++)
+                        {
+                            int requerido = requerimientosComp[indice][i] * cantidad;
+                            if (requerido > cantidades[i])
+                            {
+                                printf("- %s: faltan %.2f unidades\n", componentes[i], requerido - cantidades[i]);
+                            }
+                        }
+                    }  
                 }
             } while (respuesta != 'S' && respuesta != 's');
+            break;
 
         case 5:
             if (numProductos == 0)
@@ -223,67 +233,69 @@ int main(int argc, char *argv[])
                 break;
             }
 
+            printf("\n================= LISTA DE PRODUCTOS =================\n");
             for (int i = 0; i < numProductos; i++)
             {
-                printf("%s\t%.2f\t%.2f\t%s\n",
-                       nombres[i], tiempos[i], costos[i], registros[i]);
-
-                printf("  Componentes requeridos:\n");
+                printf("--------------------------------------------------------\n");
+                printf("Producto:           %s\n", nombres[i]);
+                printf("Tiempo fabricación: %.2f horas\n", tiempos[i]);
+                printf("Costo por unidad:   $%.2f\n", costos[i]);
+                printf("Registro sanitario: %s\n", registros[i]);
+                printf("Componentes requeridos:\n");
+                int tieneComponentes = 0;
                 for (int j = 0; j < numComponentes; j++)
                 {
                     if (requerimientosComp[i][j] > 0)
                     {
-                        printf("    - %s\t%d unidades\n", componentes[j], requerimientosComp[i][j]);
+                        printf("    - %s: %d unidades\n", componentes[j], requerimientosComp[i][j]);
+                        tieneComponentes = 1;
                     }
                 }
-                printf("\n");
             }
-            break;
-
-        case 6:
-            if (numProductos == 0)
-            {
-                printf("\nNo hay productos registrados para eliminar.\n");
                 break;
-            }
+            case 6:
+                if (numProductos == 0)
+                {
+                    printf("\nNo hay productos registrados para eliminar.\n");
+                    break;
+                }
 
-            eliminarProducto(nombres, tiempos, registros, costos, requerimientosComp, &numProductos);
-            break;
-
-        case 7:
-        if (numProductos == 0)
-            {
-                printf("\nNo hay productos registrados para editar.\n");
+                eliminarProducto(nombres, tiempos, registros, costos, requerimientosComp, &numProductos);
                 break;
-            }
-            
-            if (numComponentes == 0)
-            {
-                printf("\nNo hay componentes en el inventario.\n");
-                break;
-            }
-            
-            editarComponentesProducto(nombres, requerimientosComp, numProductos, 
-                                    componentes, cantidades, numComponentes);
-            break;
 
-        case 8:
-        if (numComponentes == 0)
-            {
-                printf("\nNo hay componentes en el inventario para aumentar.\n");
-                break;
-            }
-            
-            aumentarInventario(componentes, cantidades, numComponentes);
-            break;
+            case 7:
+                if (numProductos == 0)
+                {
+                    printf("\nNo hay productos registrados para editar.\n");
+                    break;
+                }
 
-        case 9:
-            printf("\nSaliendo del sistema. ¡Hasta pronto!\n");
-            break;
-        default:
-            printf("\nOpción inválida. Intente nuevamente.\n");
-            
-        }
+                if (numComponentes == 0)
+                {
+                    printf("\nNo hay componentes en el inventario.\n");
+                    break;
+                }
+
+                editarComponentesProducto(nombres, requerimientosComp, numProductos,
+                                          componentes, cantidades, numComponentes);
+                break;
+
+            case 8:
+                if (numComponentes == 0)
+                {
+                    printf("\nNo hay componentes en el inventario para aumentar.\n");
+                    break;
+                }
+
+                aumentarInventario(componentes, cantidades, numComponentes);
+                break;
+
+            case 9:
+                printf("\nSaliendo del sistema. ¡Hasta pronto!\n");
+                break;
+            default:
+                printf("\nOpción inválida. Intente nuevamente.\n");
+            }
     } while (opci != 9);
 
     return 0;
