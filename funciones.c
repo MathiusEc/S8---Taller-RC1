@@ -512,7 +512,7 @@ void editarComponentesProducto(char nombres[][30], int requerimientosComp[][MAX_
     char nombreProducto[30];
     int indiceProducto;
     int val, len;
-    int cantidadComp;
+    int cantidadComp, f;
     
     printf("\n--- EDITAR COMPONENTES DE PRODUCTO ---\n");
     
@@ -569,9 +569,10 @@ void editarComponentesProducto(char nombres[][30], int requerimientosComp[][MAX_
             }
             
             requerimientosComp[indiceProducto][i] = cantidadComp;
+            f = 1;
             break;
             
-        } while (1);
+        } while (f == 0);
     }
     
     printf("\nComponentes del producto '%s' actualizados correctamente.\n", nombres[indiceProducto]);
