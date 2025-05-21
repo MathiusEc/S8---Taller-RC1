@@ -227,7 +227,7 @@ int main(int argc, char *argv[])
                             int requerido = requerimientosComp[indice][i] * cantidad;
                             if (requerido > cantidades[i])
                             {
-                                if (!hayFaltantes)
+                                if (hayFaltantes == 0)
                                 {
                                     printf("Faltantes:\n");
                                     hayFaltantes = 1;
