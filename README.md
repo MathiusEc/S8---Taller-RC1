@@ -1,4 +1,4 @@
-# S8---Taller-RC1
+# S8---Taller-RC1--SIGEPRO-EC
 
 # Caso: Optimización de Producción en una Fábrica de Componentes Electrónicos
 
