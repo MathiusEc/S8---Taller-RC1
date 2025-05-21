@@ -212,16 +212,30 @@ int main(int argc, char *argv[])
                     else
                     {
                         printf("\nNo se puede ejecutar la producción debido a recursos insuficientes.\n");
-                        printf("Faltantes:\n");
+
+                        // Mostrar tiempo faltante si aplica
+                        if (tiempos[indice] * cantidad > tiempoDisponible)
+                        {
+                            float tiempoFaltante = (tiempos[indice] * cantidad) - tiempoDisponible;
+                            printf("Tiempo faltante: %.2f horas\n", tiempoFaltante);
+                        }
+
+                        // Mostrar componentes faltantes si aplica
+                        int hayFaltantes = 0;
                         for (int i = 0; i < numComponentes; i++)
                         {
                             int requerido = requerimientosComp[indice][i] * cantidad;
                             if (requerido > cantidades[i])
                             {
+                                if (!hayFaltantes)
+                                {
+                                    printf("Faltantes:\n");
+                                    hayFaltantes = 1;
+                                }
                                 printf("- %s: faltan %.2f unidades\n", componentes[i], requerido - cantidades[i]);
                             }
                         }
-                    }  
+                    }
                 }
             } while (respuesta != 'S' && respuesta != 's');
             break;
